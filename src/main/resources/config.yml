@@ -1,0 +1,4 @@
+messages:
+  prefix: "&7[&6TreasureHunt&7] &f"
+  found: "&aYou found a treasure!"
+  noPermission: "&cYou do not have permission to use this command"
