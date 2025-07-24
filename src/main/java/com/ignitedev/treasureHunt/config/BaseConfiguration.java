@@ -23,10 +23,17 @@ public class BaseConfiguration {
 
   // sql
 
+  private int port;
+  private String host;
+  private String database;
+  private String username;
+  private String password;
+
   public BaseConfiguration(FileConfiguration configuration) {
     this.fileConfiguration = configuration;
 
     loadMessages();
+    loadSql();
   }
 
   private void loadMessages() {
@@ -39,6 +46,19 @@ public class BaseConfiguration {
     this.foundMessage = getMessage(messages, "found", "&aYou found a treasure!");
     this.noPermissionMessage =
         getMessage(messages, "noPermission", "&cYou do not have permission to use this command");
+  }
+
+  private void loadSql() {
+    ConfigurationSection sql = this.fileConfiguration.getConfigurationSection("sql");
+
+    if (sql == null) {
+      sql = this.fileConfiguration.createSection("sql");
+    }
+    this.port = sql.getInt("port");
+    this.host = sql.getString("host");
+    this.database = sql.getString("database");
+    this.username = sql.getString("username");
+    this.password = sql.getString("password");
   }
 
   private Component getMessage(

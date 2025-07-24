@@ -2,3 +2,9 @@ messages:
   prefix: "&7[&6TreasureHunt&7] &f"
   found: "&aYou found a treasure!"
   noPermission: "&cYou do not have permission to use this command"
+sql:
+  host: "localhost"
+  port: 3306
+  database: "treasurehunt"
+  username: "root"
+  password: "password"
