@@ -1,0 +1,9 @@
+name: TreasureHunt
+version: '1.0.0'
+main: com.ignitedev.treasureHunt.TreasureHunt
+api-version: '1.21'
+authors: [ IgniteDEV ]
+description: A plugin to manage custom treasure across the world. Administrators can place blocks that when clicked run a command for the player. Each treasure can only be clicked once for each player
+website: https://github.com/IM-IgniteDEV
+commands:
+  treasure:
