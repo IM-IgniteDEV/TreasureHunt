@@ -20,6 +20,7 @@ public class BaseConfiguration {
   private Component prefix;
   private Component foundMessage;
   private Component noPermissionMessage;
+  private Component playerOnlyMessage;
 
   // sql
 
@@ -46,6 +47,8 @@ public class BaseConfiguration {
     this.foundMessage = getMessage(messages, "found", "&aYou found a treasure!");
     this.noPermissionMessage =
         getMessage(messages, "noPermission", "&cYou do not have permission to use this command");
+    this.playerOnlyMessage =
+        getMessage(messages, "playerOnly", "&cThis command can only be used by players");
   }
 
   private void loadSql() {

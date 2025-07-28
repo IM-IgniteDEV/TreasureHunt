@@ -2,6 +2,7 @@ messages:
   prefix: "&7[&6TreasureHunt&7] &f"
   found: "&aYou found a treasure!"
   noPermission: "&cYou do not have permission to use this command"
+  playerOnly: "&cThis command can only be used by players."
 sql:
   host: "localhost"
   port: 3306
