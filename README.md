@@ -47,4 +47,4 @@ messages:
 ## Permissions
 
 - `treasurehunt.admin` - Grants access to all admin commands
-- `treasurehunt.use` - Allows players to find treasures (granted by default)
+- `treasurehunt.use` - Allows players to find treasures
