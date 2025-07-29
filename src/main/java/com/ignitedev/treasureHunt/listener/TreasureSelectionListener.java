@@ -1,6 +1,5 @@
 package com.ignitedev.treasureHunt.listener;
 
-import com.ignitedev.treasureHunt.TreasureHunt;
 import com.ignitedev.treasureHunt.util.PlayerSelection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -11,15 +10,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class TreasureSelectionListener implements Listener {
 
-  private final TreasureHunt plugin;
-
-  public TreasureSelectionListener(TreasureHunt plugin) {
-    this.plugin = plugin;
-  }
-
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (event.getAction() != Action.LEFT_CLICK_BLOCK && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+    if (event.getAction() != Action.LEFT_CLICK_BLOCK
+        && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
       return;
     }
 
@@ -27,7 +21,7 @@ public class TreasureSelectionListener implements Listener {
     if (PlayerSelection.hasPendingSelection(player)) {
       event.setCancelled(true);
       Block clickedBlock = event.getClickedBlock();
-      if (clickedBlock != null) {
+      if (clickedBlock != null && !clickedBlock.getType().isAir()) {
         PlayerSelection.handleSelection(player, clickedBlock.getLocation());
       }
     }
