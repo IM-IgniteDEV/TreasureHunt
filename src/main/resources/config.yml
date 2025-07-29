@@ -1,9 +1,11 @@
+# Plugin Messages (supports MiniMessage format)
 messages:
   prefix: "<gray>[<gradient:gold:yellow>TreasureHunt</gradient>] <white>"
   alreadyFound: "<red>You have already found this treasure!"
   found: "<green>You found a treasure!"
   noPermission: "<red>You do not have permission to use this command"
   playerOnly: "<red>This command can only be used by players."
+# Database Configuration
 sql:
   host: "localhost"
   port: 3306
