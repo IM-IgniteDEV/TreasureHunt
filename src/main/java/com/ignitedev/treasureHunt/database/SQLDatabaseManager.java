@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
@@ -42,7 +44,7 @@ public class SQLDatabaseManager {
             });
 
     HikariConfig config = new HikariConfig();
-    config.setDriverClassName("com.mysql.cj.jdbc.MysqlDataSource");
+    config.setDriverClassName("com.mysql.cj.jdbc.Driver");
     config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
     config.setUsername(username);
     config.setPassword(password);
@@ -232,7 +234,8 @@ public class SQLDatabaseManager {
               return resultSet.next();
             }
           } catch (SQLException exception) {
-            throw new DatabaseOperationException("Failed to check if player found treasure", exception);
+            throw new DatabaseOperationException(
+                "Failed to check if player found treasure", exception);
           }
         });
   }
@@ -268,16 +271,20 @@ public class SQLDatabaseManager {
               ResultSet resultSet =
                   statement.executeQuery("SELECT id, world, x, y, z FROM treasure_locations")) {
 
-            // First, collect all treasure IDs
             List<String> treasureIds = new ArrayList<>();
             while (resultSet.next()) {
               String treasureId = resultSet.getString("id");
+              Location location =
+                  new Location(
+                      Bukkit.getWorld(resultSet.getString("world")),
+                      resultSet.getDouble("x"),
+                      resultSet.getDouble("y"),
+                      resultSet.getDouble("z"));
+
               treasureIds.add(treasureId);
-              // Create treasure with empty rewards for now, we'll update them in parallel
-              treasures.put(treasureId, new Treasure(treasureId, new ArrayList<>()));
+              treasures.put(treasureId, new Treasure(treasureId, location, new ArrayList<>()));
             }
 
-            // Load all rewards in parallel
             List<CompletableFuture<Void>> rewardFutures =
                 treasureIds.stream()
                     .map(
@@ -287,12 +294,10 @@ public class SQLDatabaseManager {
                                     rewards -> {
                                       Treasure treasure = treasures.get(treasureId);
                                       if (treasure != null) {
-                                        treasure.getRewardCommands().addAll(rewards);
+                                        treasure.rewardCommands().addAll(rewards);
                                       }
                                     }))
                     .toList();
-
-            // Wait for all reward loads to complete
             CompletableFuture.allOf(rewardFutures.toArray(new CompletableFuture[0])).join();
 
           } catch (SQLException exception) {
@@ -325,7 +330,8 @@ public class SQLDatabaseManager {
               }
             }
           } catch (SQLException exception) {
-            throw new DatabaseOperationException("Failed to get players who found treasure", exception);
+            throw new DatabaseOperationException(
+                "Failed to get players who found treasure", exception);
           }
           return playerUuids;
         });
