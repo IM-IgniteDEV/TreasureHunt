@@ -16,11 +16,12 @@ public class TreasureSelectionListener implements Listener {
         && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
       return;
     }
-
     Player player = event.getPlayer();
+
     if (PlayerSelection.hasPendingSelection(player)) {
       event.setCancelled(true);
       Block clickedBlock = event.getClickedBlock();
+
       if (clickedBlock != null && !clickedBlock.getType().isAir()) {
         PlayerSelection.handleSelection(player, clickedBlock.getLocation());
       }

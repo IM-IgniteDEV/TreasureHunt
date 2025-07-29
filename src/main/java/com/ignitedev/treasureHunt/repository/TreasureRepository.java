@@ -2,8 +2,8 @@ package com.ignitedev.treasureHunt.repository;
 
 import com.ignitedev.treasureHunt.base.Treasure;
 import com.ignitedev.treasureHunt.database.SQLDatabaseManager;
-
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,29 +40,52 @@ public class TreasureRepository {
 
   public void createTreasure(Location location, String id, List<String> rewardCommands) {
     this.sqlDatabaseManager
-        .saveTreasureLocation(
-            id,
-            location.getWorld().getName(),
-            location.getX(),
-            location.getY(),
-            location.getZ());
-
-    rewardCommands.forEach(command -> this.sqlDatabaseManager.addTreasureReward(id, command));
-    treasureCache.put(id, new Treasure(id, rewardCommands));
+        .saveTreasureLocationAsync(
+            id, location.getWorld().getName(), location.getX(), location.getY(), location.getZ())
+        .thenRun(
+            () -> {
+              rewardCommands.forEach(
+                  command -> this.sqlDatabaseManager.addTreasureRewardAsync(id, command));
+              treasureCache.put(id, new Treasure(id, location, rewardCommands));
+            });
   }
 
   public void removeTreasure(String id) {
-    this.sqlDatabaseManager.deleteTreasureLocation(id);
-    treasureCache.remove(id);
+    this.sqlDatabaseManager.deleteTreasureLocationAsync(id).thenRun(() -> treasureCache.remove(id));
   }
 
   public void loadAllTreasures() {
     this.treasureCache.clear();
-    this.treasureCache.putAll(sqlDatabaseManager.loadAllTreasures());
+
+    this.sqlDatabaseManager
+        .loadAllTreasuresAsync()
+        .whenComplete(
+            (treasures, exception) -> {
+              this.treasureCache.putAll(treasures);
+            });
   }
 
   public Optional<Treasure> getTreasure(String id) {
     return Optional.ofNullable(treasureCache.get(id));
+  }
+
+  public Optional<Treasure> getTreasureByBlock(org.bukkit.block.Block block) {
+    if (block == null) {
+      return Optional.empty();
+    }
+    Location blockLoc = block.getLocation();
+    
+    return treasureCache.values().stream()
+        .filter(treasure -> {
+          Location treasureLoc = treasure.location();
+          return treasureLoc != null && 
+                 treasureLoc.getWorld() != null &&
+                 treasureLoc.getWorld().getName().equals(blockLoc.getWorld().getName()) &&
+                 treasureLoc.getBlockX() == blockLoc.getBlockX() &&
+                 treasureLoc.getBlockY() == blockLoc.getBlockY() &&
+                 treasureLoc.getBlockZ() == blockLoc.getBlockZ();
+        })
+        .findFirst();
   }
 
   public List<Treasure> getAllTreasures() {
@@ -71,14 +94,14 @@ public class TreasureRepository {
 
   // PLAYER INTERACTION
 
-  public boolean hasPlayerFoundTreasure(UUID playerId, String treasureId) {
+  public CompletableFuture<Boolean> hasPlayerFoundTreasure(UUID playerId, String treasureId) {
     return getTreasure(treasureId)
-        .map(treasure -> sqlDatabaseManager.hasPlayerFoundTreasure(playerId, treasureId))
-        .orElse(false);
+        .map(treasure -> sqlDatabaseManager.hasPlayerFoundTreasureAsync(playerId, treasureId))
+        .orElse(CompletableFuture.completedFuture(false));
   }
 
   public void markTreasureAsFound(UUID playerId, String treasureId) {
     getTreasure(treasureId)
-        .ifPresent(treasure -> sqlDatabaseManager.markTreasureAsFound(playerId, treasureId));
+        .ifPresent(treasure -> sqlDatabaseManager.markTreasureAsFoundAsync(playerId, treasureId));
   }
 }
