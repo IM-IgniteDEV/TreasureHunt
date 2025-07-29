@@ -18,6 +18,7 @@ public class BaseConfiguration {
   // messages
 
   private Component prefix;
+  private Component alreadyFound;
   private Component foundMessage;
   private Component noPermissionMessage;
   private Component playerOnlyMessage;
@@ -43,6 +44,7 @@ public class BaseConfiguration {
     if (messages == null) {
       messages = this.fileConfiguration.createSection("messages");
     }
+    this.alreadyFound = getMessage(messages, "alreadyFound", "&cYou have already found this treasure");
     this.prefix = getMessage(messages, "prefix", "&7[&6TreasureHunt&7] &f");
     this.foundMessage = getMessage(messages, "found", "&aYou found a treasure!");
     this.noPermissionMessage =
@@ -66,10 +68,9 @@ public class BaseConfiguration {
 
   private Component getMessage(
       ConfigurationSection configurationSection, String path, @Nullable String def) {
-    String string = configurationSection.getString(path);
-
+    String string = configurationSection.getString(path, def);
     if (string == null) {
-      string = def;
+      return Component.empty();
     }
     return BaseUtility.colorize(string);
   }
