@@ -3,8 +3,9 @@ package com.ignitedev.treasureHunt;
 import com.ignitedev.treasureHunt.command.TreasureCommand;
 import com.ignitedev.treasureHunt.config.BaseConfiguration;
 import com.ignitedev.treasureHunt.database.SQLDatabaseManager;
-import com.ignitedev.treasureHunt.listener.TreasureSelectionListener;
+import com.ignitedev.treasureHunt.listener.*;
 import com.ignitedev.treasureHunt.repository.TreasureRepository;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TreasureHunt extends JavaPlugin {
@@ -27,13 +28,21 @@ public final class TreasureHunt extends JavaPlugin {
             this);
 
     TreasureRepository.initialize(this.sqlDatabaseManager);
-    TreasureRepository.get().loadAllTreasures();
-    
+
+    TreasureRepository treasureRepository = TreasureRepository.get();
+    treasureRepository.loadAllTreasures();
+
     // Register listeners
-    getServer().getPluginManager().registerEvents(new TreasureSelectionListener(this), this);
-    
+    PluginManager pluginManager = getServer().getPluginManager();
+
+    pluginManager.registerEvents(new TreasureSelectionListener(), this);
+    pluginManager.registerEvents(new TreasureInteractListener(baseConfiguration, this), this);
+    pluginManager.registerEvents(new GuiListener(), this);
+
     // Register commands
-    getCommand("treasure").setExecutor(new TreasureCommand(this, baseConfiguration));
+    getCommand("treasure")
+        .setExecutor(
+            new TreasureCommand( treasureRepository, sqlDatabaseManager, baseConfiguration));
   }
 
   @Override
