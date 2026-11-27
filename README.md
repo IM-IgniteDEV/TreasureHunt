@@ -1,5 +1,7 @@
 ![Treasure Hunt Banner](https://i.imgur.com/01BQpvE.png)
 
+Plugin page, docs and download: https://ignitedstudios.dev/free/treasurehunt
+
 # Treasure Hunt
 *Turn your server into a world full of hidden riches!*
 
